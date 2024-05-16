@@ -59,4 +59,4 @@ const userService = {
 };
 
 export default UserRepository;
-export { userRepository, userService }
+export { userRepository, userService };
