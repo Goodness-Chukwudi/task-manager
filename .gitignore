@@ -133,3 +133,5 @@ dist
 .ebextensions/
 #Package build
 builds
+
+.DS_Store

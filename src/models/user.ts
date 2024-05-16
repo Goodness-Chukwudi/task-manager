@@ -1,6 +1,6 @@
 import { Document, Schema, Types, model} from "mongoose";
 import mongoosePagination from "mongoose-paginate-v2";
-import { GENDER } from "../data/enums/enum";
+import { GENDER, ITEM_STATUS } from "../data/enums/enum";
 import MODEL_NAMES from "../data/model_names";
 
 const schemaFields: Record<keyof Omit<IUser, "full_name" | "phone_with_country_code">, any> = {
@@ -10,7 +10,8 @@ const schemaFields: Record<keyof Omit<IUser, "full_name" | "phone_with_country_c
     email: { type: String, lowercase: true, unique: true, trim: true, required: [true, "email is required"]},
     phone: { type: String, unique: true, required: [true, "phone is required"], trim: true},
     phone_country_code: { type: String,  default: "234"},
-    gender: {type: String, lowercase: true, required: [true, "gender is required"], enum: Object.values(GENDER)}
+    gender: {type: String, lowercase: true, required: [true, "gender is required"], enum: Object.values(GENDER)},
+    status: {type: String, enum: Object.values(ITEM_STATUS), default: ITEM_STATUS.ACTIVE}
 }
 const UserSchema = new Schema(
     schemaFields,
@@ -47,6 +48,7 @@ interface ICreateUserPayload {
     phone: string;
     phone_country_code?: string;
     gender: string;
+    status: string;
 }
 
 interface IUser extends Required<ICreateUserPayload> {};

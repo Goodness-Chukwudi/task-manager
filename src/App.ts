@@ -8,13 +8,15 @@ import Env from "./common/config/environment_variables";
 import corsSettings from "./common/utils/cors";
 import AppValidator from "./middlewares/validators/AppValidator";
 import fileUpload from "express-fileupload";
+import AdminRoutes from "./routes/AdminRoutes";
 
 class App {
 
     public app: Express;
     private authMiddleware: AuthMiddleware;
-    private appRoutes: AppRoutes;
     private appValidator: AppValidator;
+    private appRoutes: AppRoutes;
+    private adminRoutes: AdminRoutes;
 
     constructor() {
       this.app = express();
@@ -30,13 +32,14 @@ class App {
       this.app.use(helmet());
       this.app.use(compression());
 
-      this.authMiddleware = new AuthMiddleware(this.app);
-      this.appRoutes = new AppRoutes(this.app);
-      this.appValidator = new AppValidator(this.app);
     }
-
-    private plugInRoutes() {
     
+    private plugInRoutes() {
+      this.authMiddleware = new AuthMiddleware(this.app);
+      this.appValidator = new AppValidator(this.app);
+      this.appRoutes = new AppRoutes(this.app);
+      this.adminRoutes = new AdminRoutes(this.app);
+      
       this.app.get("/", (req, res) => {
         res.status(200).send("<h1>Successful</h1>");
       });
@@ -54,12 +57,12 @@ class App {
       //  ALWAYS PREFIX EACH ENDPOINT WITH THE VALUE OF <API_PATH>
       //  THE AUTH GUARD ONLY WATCHES OUT FOR ENDPOINTS PREFIXED WITH THE VALUE OF <API_PATH>
       
-      //  Load Authentication MiddleWare
+      //  Load Authentication MiddleWare. Routes after this are protected
       this.app.use(Env.API_PATH, this.authMiddleware.authGuard);
       
-      //Initialize other routes
-      //These routes are protected by the auth guard
+      //Initialize other routes. These routes are protected by the auth guard
       this.appRoutes.initializeRoutes();
+      this.adminRoutes.initializeRoutes();
 
       //return a 404 for unspecified/unmatched routes
       this.app.all("*", (req, res) => {
