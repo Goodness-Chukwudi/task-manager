@@ -1,20 +1,24 @@
 import { UNABLE_TO_COMPLETE_REQUEST, badRequestError, resourceNotFound } from "../../common/constant/error_response_message";
 import { ITEM_STATUS } from "../../data/enums/enum";
+import AppValidator from "../../middlewares/validators/AppValidator";
 import { userRepository } from "../../services/user_service";
 import BaseApiController from "../base controllers/BaseApiController";
 
 
 class UserManagementController extends BaseApiController {
-
+    private appValidator: AppValidator;
     constructor() {
         super();
     }
 
     protected initializeServices() {}
     
-    protected initializeMiddleware() {}
+    protected initializeMiddleware() {
+        this.appValidator = new AppValidator(this.router);
+    }
 
     protected initializeRoutes() {
+        //Assign admin
         this.listUsers("/"); //GET
         this.getUser("/:id"); //GET
         this.updateUserStatus("/:id/status/:status"); //PATCH
@@ -51,12 +55,12 @@ class UserManagementController extends BaseApiController {
     }
 
     getUser(path:string) {
-        this.router.get(path, async (req, res) => {
+        this.router.get(path, this.appValidator.validateDefaultParams, async (req, res) => {
             try {
                 const user = await userRepository.findById(req.params.id);
                 if (!user) {
                     const error = new Error("User with the provided id not found");
-                    this.sendErrorResponse(res, error, resourceNotFound("user"), 404);
+                    return this.sendErrorResponse(res, error, resourceNotFound("user"), 404);
                 }
 
                 this.sendSuccessResponse(res, user);
@@ -67,19 +71,19 @@ class UserManagementController extends BaseApiController {
     }
 
     updateUserStatus(path:string) {
-        this.router.patch(path, async (req, res) => {
+        this.router.patch(path, this.appValidator.validateDefaultParams, async (req, res) => {
             try {
                 const status = req.params.status;
                 if (status != ITEM_STATUS.ACTIVE && status != ITEM_STATUS.DEACTIVATED) {
                     const message = "'status' must be " + ITEM_STATUS.ACTIVE +" or "+ ITEM_STATUS.DEACTIVATED;
                     const error = new Error(message);
-                    this.sendErrorResponse(res, error, badRequestError(message), 400);
+                    return this.sendErrorResponse(res, error, badRequestError(message), 400);
                 }
 
                 let user = await userRepository.findById(req.params.id);
                 if (!user) {
                     const error = new Error("User with the provided id not found");
-                    this.sendErrorResponse(res, error, resourceNotFound("user"), 404);
+                    return this.sendErrorResponse(res, error, resourceNotFound("user"), 404);
                 }
 
                 user.status = status;

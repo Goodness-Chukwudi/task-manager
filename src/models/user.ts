@@ -48,7 +48,7 @@ interface ICreateUserPayload {
     phone: string;
     phone_country_code?: string;
     gender: string;
-    status: string;
+    status?: string;
 }
 
 interface IUser extends Required<ICreateUserPayload> {};

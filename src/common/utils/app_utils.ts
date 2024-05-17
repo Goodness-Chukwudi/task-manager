@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import mongoose, { ClientSession } from 'mongoose';
 import Env from '../config/environment_variables';
 import { ENVIRONMENTS } from '../config/app_config';
+import { Request, Response } from 'express';
 
 const generateUUID = (): string => {
     try {
@@ -101,10 +102,19 @@ const createMongooseTransaction = (): Promise<ClientSession> => {
     });
 }
 
+/**
+ * Records and logs the response time for http requests
+ * @returns {void}
+*/
+const recordResponseTime = (req:Request, res:Response, time:number) => {
+    console.log(`${req.method}: ${req.url} => ${time}ms`);
+}
+
 export {
     createMongooseTransaction,
     convertToBoolean,
     getAlphaCode,
     getCode,
-    generateUUID
+    generateUUID,
+    recordResponseTime
 };

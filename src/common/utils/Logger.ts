@@ -17,7 +17,7 @@ class Logger {
      * - res is provided if the error occurred in a http request and the route and method needs to be recorded
      * @returns void
     */
-    public logError(error: Error, res?: Response) {
+    public captureError(error: Error, res?: Response) {
 
         winston.add(
             new winston.transports.Console({

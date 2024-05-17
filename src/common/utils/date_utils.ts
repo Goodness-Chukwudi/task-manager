@@ -121,7 +121,7 @@ const getDateDifference = (startDate: Date, endDate: Date, unit: string) => {
  * @param {Date} date A javascript date object.
  * @returns {Date} a javascript date object
 */
-const startOfDay = (date: Date) => {
+const getStartOfDay = (date: Date) => {
     return moment(date).startOf("day").toDate();
 }
 
@@ -130,7 +130,7 @@ const startOfDay = (date: Date) => {
  * @param {Date} date A javascript date object.
  * @returns {Date} a javascript date object
 */
-const endOfDay = (date: Date) => {
+const getEndOfDay = (date: Date) => {
     return moment(date).endOf("day").toDate();
 }
 
@@ -159,8 +159,8 @@ const registerTimestamp = (data: Record<string,any>) => {
 
 export {
     registerTimestamp,
-    endOfDay,
-    startOfDay,
+    getEndOfDay,
+    getStartOfDay,
     getDateDifference,
     formatDate,
     subtractFromDate,

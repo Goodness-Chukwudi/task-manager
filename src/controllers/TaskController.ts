@@ -1,6 +1,6 @@
 import BaseApiController from "./base controllers/BaseApiController";
 import { UNABLE_TO_COMPLETE_REQUEST } from "../common/constant/error_response_message";
-import { BIT, PASSWORD_STATUS } from "../data/enums/enum";
+import { PASSWORD_STATUS } from "../data/enums/enum";
 import { USER_PASSWORD_LABEL } from "../common/constant/app_constants";
 import { createMongooseTransaction } from "../common/utils/app_utils";
 import AppValidator from "../middlewares/validators/AppValidator";

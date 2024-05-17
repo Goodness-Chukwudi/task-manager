@@ -33,7 +33,7 @@ abstract class BaseResponseHandler {
             data: data
         };
 
-        if (statusCode == 500) this.logger.logError(err, res);
+        if (statusCode == 500) this.logger.captureError(err, res);
 
         res.status(statusCode).json(response);
     }

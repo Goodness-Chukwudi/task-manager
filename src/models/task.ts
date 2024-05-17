@@ -34,13 +34,13 @@ interface ICreateTask {
     created_by: string|IUserDocument;
     assigned_to: string|IUserDocument;
     expected_completion_date: Date;
-    actual_completion_date: Date
-    notes: {
+    actual_completion_date?: Date
+    notes?: {
         text: string;
         made_by: string|IUserDocument;
-        time: Date;
+        time?: Date;
     }[];
-    status: string;
+    status?: string;
 }
 
 interface ITask extends Required<ICreateTask> {};

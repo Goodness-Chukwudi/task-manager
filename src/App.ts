@@ -9,6 +9,8 @@ import corsSettings from "./common/utils/cors";
 import AppValidator from "./middlewares/validators/AppValidator";
 import fileUpload from "express-fileupload";
 import AdminRoutes from "./routes/AdminRoutes";
+import responseTime from "response-time";
+import { recordResponseTime } from "./common/utils/app_utils";
 
 class App {
 
@@ -31,6 +33,7 @@ class App {
       this.app.use(corsSettings);
       this.app.use(helmet());
       this.app.use(compression());
+      this.app.use(responseTime(recordResponseTime));
 
     }
     
