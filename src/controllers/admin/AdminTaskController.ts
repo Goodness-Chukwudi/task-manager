@@ -129,6 +129,9 @@ class AdminTaskController extends BaseApiController {
                     const message = "Updating an approved task";
                     const error = new Error(message);
                     return this.sendErrorResponse(res, error, actionNotPermitted(message), 403);
+                }
+
+                if (status == TASK_STATUS.APPROVED) {
                     //update assignee
                 }
                 

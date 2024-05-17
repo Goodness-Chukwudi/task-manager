@@ -117,48 +117,23 @@ const INVALID_EMAIL = Object.freeze({
     message: "Invalid email address",
 });
 
-const FILE_NOT_FOUND = Object.freeze({
-    response_code: 22,
-    message: "File not found. Please attach a file to your request",
-});
-
-const invalidFileType = (fileTypes: string[]) => {
+const forbidden = (message: string) => {
     return {
-        response_code: 23,
-        message: "You tried to upload an invalid file type, upload a " +fileTypes.join()+ " file instead",
-    }
-}
-
-const FILE_SIZE_LIMIT = Object.freeze({
-    response_code: 24,
-    message: "The size of this file is larger than the accepted limit",
-});
-
-const FILE_UPLOAD_ERROR = Object.freeze({
-    response_code: 25,
-    message: "Error uploading file. Please try again",
-});
-
-const badRequestError = (message: string) => {
-    return {
-        response_code: 26,
+        response_code: 22,
         message: message
     }
 }
 
-const MAX_FILE_COUNT_LIMIT = Object.freeze({
-    response_code: 27,
-    message: "You have exceeded the max number of files",
-});
+const badRequestError = (message: string) => {
+    return {
+        response_code: 23,
+        message: message
+    }
+}
 
-const GMAIL_OAUTH_CONSENT_REQUIRED = Object.freeze({
-    response_code: 28,
-    message: "Please grant us the required access to continue",
-});
 
 export {
     requiredField,
-    MAX_FILE_COUNT_LIMIT,
     resourceNotFound,
     ERROR,
     DUPLICATE_EMAIL,
@@ -171,17 +146,13 @@ export {
     actionNotPermitted,
     duplicateValue,
     SESSION_EXPIRED,
+    forbidden,
     badRequestError,
-    FILE_UPLOAD_ERROR,
-    FILE_SIZE_LIMIT,
-    invalidFileType,
-    FILE_NOT_FOUND,
     INVALID_EMAIL,
     invalidValue,
     INVALID_PERMISSION,
     PASSWORD_UPDATE_REQUIRED,
     PASSWORD_MISMATCH,
     INVALID_SESSION_USER,
-    UNABLE_TO_LOGIN,
-    GMAIL_OAUTH_CONSENT_REQUIRED
+    UNABLE_TO_LOGIN
 };
