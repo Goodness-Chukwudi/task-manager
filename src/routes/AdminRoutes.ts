@@ -1,6 +1,7 @@
 import {Express} from "express";
 import Env from "../common/config/environment_variables";
 import UserManagementController from "../controllers/admin/UserManagementController";
+import AdminTaskController from "../controllers/admin/AdminTaskController";
 
 class AdminRoutes {
 
@@ -13,6 +14,7 @@ class AdminRoutes {
         const ADMIN = "/admin"
         
         this.app.use(Env.API_PATH + ADMIN + "/users", UserManagementController);
+        this.app.use(Env.API_PATH + ADMIN + "/tasks", AdminTaskController);
     }
 }
 
