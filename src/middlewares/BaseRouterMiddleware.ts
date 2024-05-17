@@ -14,7 +14,6 @@ const JoiId = Joi.extend(objectId);
  * - an instance of RequestUtils
  * - Other non private members of the BaseResponseHandler class
  * - The express router of the request
- * - an abstract method initServices that needs to be implemented when initializing services
 */
 abstract class BaseRouterMiddleware extends BaseResponseHandler {
 
@@ -26,9 +25,7 @@ abstract class BaseRouterMiddleware extends BaseResponseHandler {
         super();
         this.router = appRouter;
         this.requestUtils = new RequestUtils(this.router);
-        this.initializeServices();
     }
-    protected abstract initializeServices():void;
 
     /**
      * Validates the specified properties on the query object of a http request.

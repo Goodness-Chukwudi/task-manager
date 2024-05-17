@@ -1,14 +1,14 @@
 import DBQuery from './DBQuery';
 import UserPrivilege, { IUserPrivilege, ICreateUserPrivilege, IUserPrivilegeDocument } from '../models/user_privilege';
 
-class TaskRepository extends DBQuery<IUserPrivilege, ICreateUserPrivilege, IUserPrivilegeDocument> {
+class PrivilegeRepository extends DBQuery<IUserPrivilege, ICreateUserPrivilege, IUserPrivilegeDocument> {
     
     constructor() {
         super(UserPrivilege);
     }
 }
 
-const taskRepository = new TaskRepository();
+const privilegeRepository = new PrivilegeRepository();
 
-export default TaskRepository;
-export { taskRepository };
+export default PrivilegeRepository;
+export { privilegeRepository };

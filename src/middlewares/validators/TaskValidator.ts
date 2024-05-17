@@ -15,8 +15,6 @@ class TaskValidator extends BaseRouterMiddleware {
         super(appRouter);
     }
 
-    protected initializeServices() {};
-
     validateTask = async ( req: Request, res: Response, next: NextFunction ) => {
         try {
             const BodySchema = Joi.object({

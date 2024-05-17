@@ -13,8 +13,6 @@ class AppValidator extends BaseRouterMiddleware {
         super(appRouter);
     }
 
-    protected initializeServices() {}
-
     validateUserSignup = async ( req: Request, res: Response, next: NextFunction ) => {
         try {
             const BodySchema = Joi.object({

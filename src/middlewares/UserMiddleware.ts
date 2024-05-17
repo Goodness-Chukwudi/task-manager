@@ -14,9 +14,6 @@ class UserMiddleware extends BaseRouterMiddleware {
         super(appRouter)
     }
 
-
-    protected initializeServices() {}
-
     /**
      * A middleware that fetches a user from the db using the email provided in the request.
      * - The fetched user is available through the getDataFromState or getRequestUser method of the request service
