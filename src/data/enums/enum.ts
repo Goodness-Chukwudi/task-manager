@@ -22,21 +22,10 @@ const PASSWORD_STATUS = Object.freeze({
 });
 
 const ITEM_STATUS = Object.freeze({
-    OPEN: 'open',
-    CREATED: 'created',
-    PENDING: 'pending',
-    IN_REVIEW: 'in review',
     ACTIVE: 'active',
     DEACTIVATED: 'deactivated',
     DELETED: 'deleted',
-    ARCHIVED: 'archived',
-    SUSPENDED: 'suspended',
-    HIDDEN: 'hidden',
-    CLOSED: 'closed',
     APPROVED: 'approved',
-    REJECTED: 'rejected',
-    USED: 'used',
-    SkIPPED: 'skipped',
 });
 
 const TASK_POINTS = Object.freeze({
@@ -66,6 +55,11 @@ const TASK_STATUS = Object.freeze({
     APPROVED: "approved"
 });
 
+const USER_ROLES = Object.freeze({
+    ADMIN: "admin",
+    USER: "user"
+});
+
 export {
     GENDER,
     BIT,
@@ -74,5 +68,6 @@ export {
     ITEM_STATUS,
     TASK_POINTS,
     PRIORITY_LEVEL,
-    TASK_STATUS
+    TASK_STATUS,
+    USER_ROLES
 }

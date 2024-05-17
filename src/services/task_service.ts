@@ -9,9 +9,6 @@ class TaskRepository extends DBQuery<ITask, ICreateTask, ITaskDocument> {
 }
 
 const taskRepository = new TaskRepository();
-const taskService = {
-
-};
 
 export default TaskRepository;
-export { taskRepository, taskService };
+export { taskRepository };
