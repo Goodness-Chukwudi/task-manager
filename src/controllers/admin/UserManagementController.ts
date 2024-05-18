@@ -1,6 +1,7 @@
 import { UNABLE_TO_COMPLETE_REQUEST, badRequestError, resourceNotFound } from "../../common/constant/error_response_message";
 import { ITEM_STATUS } from "../../data/enums/enum";
 import AppValidator from "../../middlewares/validators/AppValidator";
+import { privilegeRepository } from "../../services/user_privilege_service";
 import { userRepository } from "../../services/user_service";
 import BaseApiController from "../base controllers/BaseApiController";
 
@@ -22,6 +23,8 @@ class UserManagementController extends BaseApiController {
         this.listUsers("/"); //GET
         this.getUser("/:id"); //GET
         this.updateUserStatus("/:id/status/:status"); //PATCH
+        this.assignUserPrivilege("/:id/privileges"); //POST
+        this.listUserPrivileges("/privileges/list"); //GET
     }
 
     listUsers(path:string) {
@@ -92,6 +95,47 @@ class UserManagementController extends BaseApiController {
                 this.sendSuccessResponse(res, user);
             } catch (error: any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
+            }
+        });
+    }
+
+    assignUserPrivilege(path:string) {
+
+        this.router.post(path, this.appValidator.validatePrivilegeAssignment);
+        this.router.post(path, async (req, res) => {
+            try {
+                const user = this.requestUtils.getRequestUser();
+                const body = req.body;
+
+                const privilege = {
+                    user: body.user,
+                    role: body.role,
+                    assigned_by: user.id
+                }
+                await privilegeRepository.save(privilege);
+
+                return this.sendSuccessResponse(res);
+            } catch (error:any) {
+                return this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500)
+            }
+        });
+    }
+    
+    listUserPrivileges(path:string) {
+        this.router.get(path, async (req, res) => {
+            try {
+                const selectedFields = ["user", "role", "status", "assigned_by"];
+                const populatedFields = [{ path: "user", select: "first_name middle_name last_name" }];
+
+                let limit;
+                let page;
+                if (req.query.limit) limit = Number(req.query.limit);
+                if (req.query.page) page = Number(req.query.page);
+                const userPrivileges = await privilegeRepository.paginateAndPopulate({}, limit, page, populatedFields, selectedFields);
+                
+                return this.sendSuccessResponse(res, userPrivileges);
+            } catch (error:any) {
+                return this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500)
             }
         });
     }

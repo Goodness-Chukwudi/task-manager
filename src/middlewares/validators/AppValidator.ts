@@ -2,10 +2,13 @@ import { NextFunction, Request, Response, Router } from "express";
 import Joi from "joi";
 import BaseRouterMiddleware from "../BaseRouterMiddleware";
 import { JoiValidatorOptions } from "../../common/config/app_config";
-import { GENDER } from "../../data/enums/enum";
-import { DUPLICATE_EMAIL, DUPLICATE_PHONE, badRequestError } from "../../common/constant/error_response_message";
+import { GENDER, ITEM_STATUS, USER_ROLES } from "../../data/enums/enum";
+import { DUPLICATE_EMAIL, DUPLICATE_PHONE, DUPLICATE_USER_ROLE, badRequestError } from "../../common/constant/error_response_message";
 import { userRepository } from "../../services/user_service";
+import { objectId } from "../../common/utils/joi_extensions";
+import { privilegeRepository } from "../../services/user_privilege_service";
 
+const JoiId = Joi.extend(objectId);
 
 class AppValidator extends BaseRouterMiddleware {
 
@@ -57,6 +60,30 @@ class AppValidator extends BaseRouterMiddleware {
             });
             
             await BodySchema.validateAsync(body, JoiValidatorOptions);
+
+            next();
+        } catch (error: any) {
+            return this.sendErrorResponse(res, error, badRequestError(error.message), 400);
+        }
+    };
+
+    validatePrivilegeAssignment = async ( req: Request, res: Response, next: NextFunction ) => {
+        try {
+            const body = req.body;
+            const BodySchema = Joi.object({
+                user: JoiId.string().objectId().required(),
+                role: Joi.string().valid(...Object.values(USER_ROLES)).required()
+            });
+            
+            await BodySchema.validateAsync(body, JoiValidatorOptions);
+
+            const query = {user: body.user, role: body.role, status: ITEM_STATUS.ACTIVE};
+            const existingPrivilege = await privilegeRepository.findOne(query);
+
+            if (existingPrivilege) {
+                const error = new Error("This user already has this privilege");
+                return this.sendErrorResponse(res, error, DUPLICATE_USER_ROLE, 400)
+            }
 
             next();
         } catch (error: any) {

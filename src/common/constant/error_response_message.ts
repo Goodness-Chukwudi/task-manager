@@ -131,6 +131,10 @@ const badRequestError = (message: string) => {
     }
 }
 
+const DUPLICATE_USER_ROLE = Object.freeze({
+    response_code: 24,
+    message: "This user already has this privilege",
+});
 
 export {
     requiredField,
@@ -154,5 +158,6 @@ export {
     PASSWORD_UPDATE_REQUIRED,
     PASSWORD_MISMATCH,
     INVALID_SESSION_USER,
-    UNABLE_TO_LOGIN
+    UNABLE_TO_LOGIN,
+    DUPLICATE_USER_ROLE
 };

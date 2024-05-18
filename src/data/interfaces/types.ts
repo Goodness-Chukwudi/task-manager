@@ -1,7 +1,7 @@
 import { SortOrder } from "mongoose";
 
-type DbSortQuery<T> = Record<keyof T, SortOrder> | null;
-type DbPopulation<T> = [keyof T]|Record<keyof T, string>[];
+type DbSortQuery = Record<string, SortOrder> | null;
+type DbPopulation = {path: string, select: string|string[]}[];
 
 export {
     DbSortQuery,

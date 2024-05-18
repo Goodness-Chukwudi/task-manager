@@ -14,7 +14,6 @@ const UserPrivilegeSchema = new Schema<Record<keyof IUserPrivilege, any>>({
 {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
-
 interface ICreateUserPrivilege {
     user: string | IUserDocument;
     role: string,
