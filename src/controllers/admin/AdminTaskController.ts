@@ -25,6 +25,7 @@ class AdminTaskController extends BaseApiController {
         this.createTask("/"); //POST
         this.listTask("/"); //GET
         this.getTask("/:id"); //GET
+        this.deleteTask("/:id"); //DELETE
         this.updateTask("/:id"); //PATCH
     }
 
@@ -152,6 +153,31 @@ class AdminTaskController extends BaseApiController {
                 const updatedTask = await taskRepository.updateById(task.id, update);
         
                 this.sendSuccessResponse(res, updatedTask);
+            } catch (error:any) {
+                this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
+            }
+        });
+    }
+
+    deleteTask(path:string) {
+        this.router.delete(path, this.taskValidator.validateDefaultParams)
+        this.router.delete(path, async (req, res) => {
+            try {
+                const task = await taskRepository.findById(req.params.id);
+                if (!task) {
+                    const error = new Error("Task not found");
+                    return this.sendErrorResponse(res, error, resourceNotFound("Task"), 404) 
+                }
+
+                if (task.status == TASK_STATUS.APPROVED) {
+                    const message = "Deleting an approved task";
+                    const error = new Error(message);
+                    return this.sendErrorResponse(res, error, actionNotPermitted(message), 403);
+                }
+
+                await taskRepository.deleteById(req.params.id);
+        
+                this.sendSuccessResponse(res);
             } catch (error:any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500);
             }

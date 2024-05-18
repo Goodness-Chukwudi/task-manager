@@ -435,13 +435,13 @@ abstract class DBQuery<T, TCreate, TDocument> {
 
     /**
      * Deletes the document with the id
-     * @param {FilterQuery<T>} query An optional mongo query to match the document to be deleted
+     * @param {string} query ObjectId of the document to be deleted
      * @param {ClientSession} session An optional mongoose client session, required if the operation is in a transaction
      * @returns {Promise<TDocument>} A promise resolving to the deleted document.
     */
-    public deleteById(query:FilterQuery<T>, session?:ClientSession): Promise<TDocument> {
+    public deleteById(id:string, session?:ClientSession): Promise<TDocument> {
         try {
-            return this.Model.findByIdAndDelete(query).session(session || null).exec() as Promise<TDocument>;
+            return this.Model.findByIdAndDelete(id).session(session || null).exec() as Promise<TDocument>;
             
         } catch (error) {
             throw error;

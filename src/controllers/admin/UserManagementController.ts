@@ -24,6 +24,7 @@ class UserManagementController extends BaseApiController {
         this.getUser("/:id"); //GET
         this.updateUserStatus("/:id/status/:status"); //PATCH
         this.assignUserPrivilege("/:id/privileges"); //POST
+        this.removeUserPrivilege("/:id/privileges/:id/remove"); //PATCH
         this.listUserPrivileges("/privileges/list"); //GET
     }
 
@@ -100,7 +101,6 @@ class UserManagementController extends BaseApiController {
     }
 
     assignUserPrivilege(path:string) {
-
         this.router.post(path, this.appValidator.validatePrivilegeAssignment);
         this.router.post(path, async (req, res) => {
             try {
@@ -113,6 +113,19 @@ class UserManagementController extends BaseApiController {
                     assigned_by: user.id
                 }
                 await privilegeRepository.save(privilege);
+
+                return this.sendSuccessResponse(res);
+            } catch (error:any) {
+                return this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500)
+            }
+        });
+    }
+
+    removeUserPrivilege(path:string) {
+        this.router.patch(path, async (req, res) => {
+            try {
+
+                await privilegeRepository.updateById(req.params.id, {status: ITEM_STATUS.DEACTIVATED});
 
                 return this.sendSuccessResponse(res);
             } catch (error:any) {
