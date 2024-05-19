@@ -4,14 +4,16 @@ import { ENVIRONMENTS} from './common/config/app_config';
 import validateEnvironmentVariables from './common/utils/env_validator';
 import connectToDB from './common/utils/db';
 import { userService } from "./services/user_service";
+import { socketService } from "./services/socket_service";
 
 validateEnvironmentVariables();
 connectToDB()
   .then(async () => {
-    app.listen(Env.PORT, () => {
+    const server = app.listen(Env.PORT, () => {
       if (Env.ENVIRONMENT == ENVIRONMENTS.DEV)
           console.log(`Express is listening on http://localhost:${Env.PORT}${Env.API_PATH}`);
     });
+    await socketService.createSocketConnection(server);
     await userService.createSuperAdminUser();
   })
   .catch(()=> console.log("DB Connection not successful"));

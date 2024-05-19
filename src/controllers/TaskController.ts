@@ -5,8 +5,9 @@ import { ITask } from "../models/task";
 import { getEndOfDay, getStartOfDay } from "../common/utils/date_utils";
 import { taskRepository } from "../services/task_service";
 import { UNABLE_TO_COMPLETE_REQUEST, forbidden, resourceNotFound } from "../common/constant/error_response_message";
-import { TASK_STATUS } from "../data/enums/enum";
+import { ITEM_STATUS, TASK_STATUS } from "../data/enums/enum";
 import { DbSortQuery } from "../data/interfaces/types";
+import { socketRepository, socketService } from "../services/socket_service";
 
 class TaskController extends BaseApiController {
     private taskValidator: TaskValidator;
@@ -108,19 +109,26 @@ class TaskController extends BaseApiController {
                     return this.sendErrorResponse(res, error, forbidden(message), 403);
                 }
                 
-                if (status == TASK_STATUS.COMPLETED) {
-                    //update assignee
-                }
-                
                 const update:UpdateQuery<ITask> = { status };
                 if (note) {
                     update["$push"] = {
                         notes: { text: note, made_by: user.id}
                     }
-                    //Update assignee
                 }
 
                 const updatedTask = await taskRepository.updateById(task.id, update);
+                const assigner = await socketRepository.findOne({user: task.created_by, status: ITEM_STATUS.ACTIVE});
+                if (status == TASK_STATUS.COMPLETED) {
+                    //Send socket notification to assigner
+                    if (assigner) {
+                        await socketService.emitEvent(assigner.socket_ids, "task-completed", updatedTask);
+                    }
+                } else {
+                    //Send task-update socket notification to assigner
+                    if (assigner) {
+                        await socketService.emitEvent(assigner.socket_ids, "task-update", updatedTask);
+                    }
+                }
         
                 this.sendSuccessResponse(res, updatedTask);
             } catch (error:any) {

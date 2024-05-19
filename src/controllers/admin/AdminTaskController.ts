@@ -4,10 +4,11 @@ import TaskValidator from "../../middlewares/validators/TaskValidator";
 import { taskRepository } from "../../services/task_service";
 import { getEndOfDay, getStartOfDay } from "../../common/utils/date_utils";
 import { UNABLE_TO_COMPLETE_REQUEST, actionNotPermitted, resourceNotFound } from "../../common/constant/error_response_message";
-import { TASK_STATUS } from "../../data/enums/enum";
+import { ITEM_STATUS, TASK_STATUS } from "../../data/enums/enum";
 import { UpdateQuery } from "mongoose";
 import { ITask } from "../../models/task";
 import { DbSortQuery } from "../../data/interfaces/types";
+import { socketRepository, socketService } from "../../services/socket_service";
 
 class AdminTaskController extends BaseApiController {
     private taskValidator: TaskValidator;
@@ -36,12 +37,12 @@ class AdminTaskController extends BaseApiController {
             try {
                 const user = this.requestUtils.getRequestUser();
                 const body = req.body;
-
+                
                 const taskNote = [];
                 if (body.note) {
                     taskNote.push({ text: body.note, made_by: user.id});
                 }
-
+                
                 const taskData = {
                     title: body.title,
                     points: body.points,
@@ -51,9 +52,14 @@ class AdminTaskController extends BaseApiController {
                     expected_completion_date: body.expected_completion_date,
                     notes: taskNote
                 };
-
+                
                 const task = await taskRepository.save(taskData);
+
                 //Send socket notification to assignee
+                const assignee = await socketRepository.findOne({user: body.assigned_to, status: ITEM_STATUS.ACTIVE});
+                if (assignee) {
+                    await socketService.emitEvent(assignee.socket_ids, "new-task", task);
+                }
         
                 this.sendSuccessResponse(res, task, undefined, 201);
             } catch (error:any) {
@@ -140,10 +146,6 @@ class AdminTaskController extends BaseApiController {
                     const error = new Error(message);
                     return this.sendErrorResponse(res, error, actionNotPermitted(message), 403);
                 }
-
-                if (status == TASK_STATUS.APPROVED) {
-                    //update assignee
-                }
                 
                 const update:UpdateQuery<ITask> = {
                     title,
@@ -156,10 +158,21 @@ class AdminTaskController extends BaseApiController {
                     update["$push"] = {
                         notes: { text: note, made_by: user.id}
                     }
-                    //Update assignee
                 }
 
                 const updatedTask = await taskRepository.updateById(task.id, update);
+                const assignee = await socketRepository.findOne({user: task.assigned_to, status: ITEM_STATUS.ACTIVE});
+                if (status == TASK_STATUS.APPROVED) {
+                    //Send socket notification to assignee
+                    if (assignee) {
+                        await socketService.emitEvent(assignee.socket_ids, "task-approval", updatedTask);
+                    }
+                } else {
+                    //Send task-update socket notification to assignee
+                    if (assignee) {
+                        await socketService.emitEvent(assignee.socket_ids, "task-update", updatedTask);
+                    }
+                }
         
                 this.sendSuccessResponse(res, updatedTask);
             } catch (error:any) {

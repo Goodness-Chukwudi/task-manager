@@ -5,6 +5,9 @@ import { getCode } from "./app_utils";
 import bcrypt from 'bcryptjs';
 import Jwt from "jsonwebtoken";
 import { AuthTokenPayload } from "../../data/interfaces/interfaces";
+import { BIT } from "../../data/enums/enum";
+import { loginSessionRepository } from "../../services/login_session_service";
+import { ILoginSessionDocument } from "../../models/login_session";
 
 /**
  * Generates an authentication token. Signs the provided data into the token
@@ -102,11 +105,44 @@ const getTokenFromRequest = (req: Request): string => {
     return jwt;
 }
 
+const authenticateSocketConnection = (token:string): Promise<ILoginSessionDocument> => {
+    
+    return new Promise((resolve, reject) => {
+        verifyJwtToken(token, async (error, decoded) => {
+            try {
+                if (error) {
+                    console.log(error);
+                    reject(new Error("Socket Authentication failed"));
+                } else {
+                    const data:AuthTokenPayload = decoded.data;
+                    const query = {_id: data.loginSession, user: data.user, status: BIT.ON };
+                    const loginSession = await loginSessionRepository.findOne(query);
+                    if (loginSession) {                
+                        if (loginSession.validity_end_date <= new Date()) {
+                            loginSession.expired = true;
+                            loginSession.status = BIT.OFF;
+                            await loginSession.save();
+                            reject(new Error("Socket Authentication failed"));
+                        }
+                        resolve(loginSession);
+                    } else {
+                        reject(new Error("Socket Authentication failed"));
+                    }
+                }
+            } catch (error:any) {
+                console.log(error);
+                reject(new Error("Socket Authentication failed"));
+            }
+        })
+    })
+}
+
 export {
     getTokenFromRequest,
     validateHashedData,
     hashData,
     createDefaultPassword,
     verifyJwtToken,
-    createAuthToken
+    createAuthToken,
+    authenticateSocketConnection
 };
