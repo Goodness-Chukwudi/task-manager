@@ -32,7 +32,7 @@ const createSocketConnection = async (server: Server) => {
             console.log("connected to socket server with socket id - " + _socket.id);
             socket = _socket;
 
-            _socket.on("online", handleConnection);
+            _socket.on("request-connection", handleConnection);
             _socket.on("disconnect", handleDisconnection);
 
         });
@@ -44,9 +44,8 @@ const createSocketConnection = async (server: Server) => {
 const handleDisconnection = async () => {
     try {
         const socketConnection = await socketRepository.findOne({socket_ids: socket.id, status: ITEM_STATUS.ACTIVE});
-        socketConnection.socket_ids.filter(socket_id => socket_id != socket.id);
+        socketConnection.socket_ids = socketConnection.socket_ids.filter(socket_id => socket_id != socket.id);
         await socketConnection.save();
-
     } catch (error) {
         console.log(error)
     }
@@ -57,14 +56,15 @@ const handleConnection = async (payLoad: any) => {
         success: false,
         error: "Sorry, an error occurred on the server"
     }
-
     try {
         const loginSession = await authenticateSocketConnection(payLoad.token);
         const socketConnection = await socketRepository.findOne({user: loginSession.user, status: ITEM_STATUS.ACTIVE});
 
         if (socketConnection) {
-            socketConnection.socket_ids.push(socket.id);
-            await socketConnection.save();
+            if (!socketConnection.socket_ids.includes(socket.id)) {
+                socketConnection.socket_ids.push(socket.id);
+                await socketConnection.save();
+            }
         } else {
             const newConnection = {
                 login_session: loginSession.id,

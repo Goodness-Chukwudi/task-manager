@@ -111,7 +111,7 @@ const authenticateSocketConnection = (token:string): Promise<ILoginSessionDocume
         verifyJwtToken(token, async (error, decoded) => {
             try {
                 if (error) {
-                    console.log(error);
+                    console.log(error.message);
                     reject(new Error("Socket Authentication failed"));
                 } else {
                     const data:AuthTokenPayload = decoded.data;
@@ -130,7 +130,7 @@ const authenticateSocketConnection = (token:string): Promise<ILoginSessionDocume
                     }
                 }
             } catch (error:any) {
-                console.log(error);
+                console.log(error.message);
                 reject(new Error("Socket Authentication failed"));
             }
         })
