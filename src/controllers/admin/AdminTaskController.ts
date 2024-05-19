@@ -7,6 +7,7 @@ import { UNABLE_TO_COMPLETE_REQUEST, actionNotPermitted, resourceNotFound } from
 import { TASK_STATUS } from "../../data/enums/enum";
 import { UpdateQuery } from "mongoose";
 import { ITask } from "../../models/task";
+import { DbSortQuery } from "../../data/interfaces/types";
 
 class AdminTaskController extends BaseApiController {
     private taskValidator: TaskValidator;
@@ -85,10 +86,15 @@ class AdminTaskController extends BaseApiController {
 
                 let limit;
                 let page;
+                let sort;
                 if (reqQuery.limit) limit = Number(reqQuery.limit);
                 if (reqQuery.page) page = Number(reqQuery.page);
+                if (req.query.sort) sort = req.query.sort as unknown as DbSortQuery;
 
-                const tasks = await taskRepository.paginate(query, limit, page);
+                const selectedFields = ["title", "assigned_to", "expected_completion_date", "points", "priority"];
+                const populatedFields = [{ path: "assigned_to", select: "first_name middle_name last_name" }];
+
+                const tasks = await taskRepository.paginateAndPopulate(query, limit, page, populatedFields, selectedFields, sort);
         
                 this.sendSuccessResponse(res, tasks);
             } catch (error:any) {
@@ -100,8 +106,11 @@ class AdminTaskController extends BaseApiController {
     getTask(path:string) {
         this.router.get(path, this.taskValidator.validateDefaultParams, async (req, res) => {
             try {
-
-                const task = await taskRepository.findById(req.params.id);
+                const populatedFields = [
+                    { path: "assigned_to", select: "first_name middle_name last_name" },
+                    { path: "created_by", select: "first_name middle_name last_name" }
+                ];
+                const task = await taskRepository.findByIdAndPopulate(req.params.id, populatedFields);
                 if (!task) {
                     const error = new Error("Task not found");
                     return this.sendErrorResponse(res, error, resourceNotFound("Task"), 404) 
@@ -115,8 +124,8 @@ class AdminTaskController extends BaseApiController {
     }
 
     updateTask(path:string) {
-        this.router.get(path, this.taskValidator.validateDefaultParams, this.taskValidator.validateTaskUpdate)
-        this.router.get(path, async (req, res) => {
+        this.router.patch(path, this.taskValidator.validateDefaultParams, this.taskValidator.validateTaskUpdate)
+        this.router.patch(path, async (req, res) => {
             const user = await this.requestUtils.getRequestUser();
             try {
                 const {title, points, priority, expected_completion_date, note, status} = req.body;

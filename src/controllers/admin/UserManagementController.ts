@@ -1,5 +1,6 @@
 import { UNABLE_TO_COMPLETE_REQUEST, badRequestError, resourceNotFound } from "../../common/constant/error_response_message";
 import { ITEM_STATUS } from "../../data/enums/enum";
+import { DbSortQuery } from "../../data/interfaces/types";
 import AppValidator from "../../middlewares/validators/AppValidator";
 import { privilegeRepository } from "../../services/user_privilege_service";
 import { userRepository } from "../../services/user_service";
@@ -19,12 +20,11 @@ class UserManagementController extends BaseApiController {
     }
 
     protected initializeRoutes() {
-        //Assign admin
         this.listUsers("/"); //GET
         this.getUser("/:id"); //GET
         this.updateUserStatus("/:id/status/:status"); //PATCH
-        this.assignUserPrivilege("/:id/privileges"); //POST
-        this.removeUserPrivilege("/:id/privileges/:id/remove"); //PATCH
+        this.assignUserPrivilege("/privileges"); //POST
+        this.removeUserPrivilege("/privileges/:id/remove"); //PATCH
         this.listUserPrivileges("/privileges/list"); //GET
     }
 
@@ -46,10 +46,14 @@ class UserManagementController extends BaseApiController {
 
                 let limit;
                 let page;
+                let sort;
                 if (req.query.limit) limit = Number(req.query.limit);
                 if (req.query.page) page = Number(req.query.page);
+                if (req.query.sort) sort = req.query.sort as unknown as DbSortQuery;
+                
+                const selectedFields = ["first_name", "last_name", "middle_name", "gender", "status"]
 
-                const users = await userRepository.paginate(query, limit, page);
+                const users = await userRepository.paginate(query, limit, page, sort, selectedFields);
 
                 this.sendSuccessResponse(res, users);
             } catch (error: any) {
@@ -144,7 +148,7 @@ class UserManagementController extends BaseApiController {
                 let page;
                 if (req.query.limit) limit = Number(req.query.limit);
                 if (req.query.page) page = Number(req.query.page);
-                const userPrivileges = await privilegeRepository.paginateAndPopulate({}, limit, page, populatedFields, selectedFields);
+                const userPrivileges = await privilegeRepository.paginateAndPopulate({status: ITEM_STATUS.ACTIVE}, limit, page, populatedFields, selectedFields);
                 
                 return this.sendSuccessResponse(res, userPrivileges);
             } catch (error:any) {

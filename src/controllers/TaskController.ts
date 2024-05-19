@@ -6,6 +6,7 @@ import { getEndOfDay, getStartOfDay } from "../common/utils/date_utils";
 import { taskRepository } from "../services/task_service";
 import { UNABLE_TO_COMPLETE_REQUEST, forbidden, resourceNotFound } from "../common/constant/error_response_message";
 import { TASK_STATUS } from "../data/enums/enum";
+import { DbSortQuery } from "../data/interfaces/types";
 
 class TaskController extends BaseApiController {
     private taskValidator: TaskValidator;
@@ -31,6 +32,7 @@ class TaskController extends BaseApiController {
             try {
                 const user = this.requestUtils.getRequestUser();
                 const reqQuery: Record<string, any> = req.query;
+                
                 let query:FilterQuery<ITask> = {assigned_to: user.id};
 
                 if (reqQuery.status) query = {...query, status: reqQuery.status};
@@ -50,10 +52,15 @@ class TaskController extends BaseApiController {
 
                 let limit;
                 let page;
+                let sort;
                 if (reqQuery.limit) limit = Number(reqQuery.limit);
                 if (reqQuery.page) page = Number(reqQuery.page);
+                if (req.query.sort) sort = req.query.sort as unknown as DbSortQuery;
 
-                const tasks = await taskRepository.paginate(query, limit, page);
+                const selectedFields = ["title", "created_by", "expected_completion_date", "points", "priority"];
+                const populatedFields = [{ path: "created_by", select: "first_name middle_name last_name" }];
+
+                const tasks = await taskRepository.paginateAndPopulate(query, limit, page, populatedFields, selectedFields, sort);
         
                 this.sendSuccessResponse(res, tasks);
             } catch (error:any) {
@@ -66,7 +73,11 @@ class TaskController extends BaseApiController {
         this.router.get(path, this.taskValidator.validateDefaultParams, async (req, res) => {
             try {
                 const user = this.requestUtils.getRequestUser();
-                const task = await taskRepository.findOne({_id: req.params.id, assigned_to: user.id});
+                const populatedFields = [
+                    { path: "created_by", select: "first_name middle_name last_name" }
+                ];
+
+                const task = await taskRepository.findOneAndPopulate({_id: req.params.id, assigned_to: user.id}, populatedFields);
                 if (!task) {
                     const error = new Error("Task not found");
                     return this.sendErrorResponse(res, error, resourceNotFound("Task"), 404) 
@@ -80,8 +91,8 @@ class TaskController extends BaseApiController {
     }
 
     updateTask(path:string) {
-        this.router.get(path, this.taskValidator.validateDefaultParams, this.taskValidator.validateTaskUpdate)
-        this.router.get(path, async (req, res) => {
+        this.router.patch(path, this.taskValidator.validateDefaultParams, this.taskValidator.validateTaskUpdate)
+        this.router.patch(path, async (req, res) => {
             const user = await this.requestUtils.getRequestUser();
             try {
                 const {note, status} = req.body;
@@ -91,11 +102,10 @@ class TaskController extends BaseApiController {
                     return this.sendErrorResponse(res, error, resourceNotFound("Task"), 404) 
                 }
 
-                if (task.status == TASK_STATUS.APPROVED) {
-                    const message = "You are not allowed to approve a task";
+                if (status == TASK_STATUS.APPROVED) {
+                    const message = "You are not allowed to approve this task";
                     const error = new Error(message);
                     return this.sendErrorResponse(res, error, forbidden(message), 403);
-                    //update assignee
                 }
                 
                 if (status == TASK_STATUS.COMPLETED) {

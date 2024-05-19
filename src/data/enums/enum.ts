@@ -46,8 +46,8 @@ const PRIORITY_LEVEL = Object.freeze({
 
 const TASK_STATUS = Object.freeze({
     BACKLOG: "backlog",
-    TO_DO: "to do",
-    IN_PROGRESS: "in progress",
+    TO_DO: "to_do",
+    IN_PROGRESS: "in_progress",
     BLOCKED: "blocked",
     SUSPENDED: "suspended",
     COMPLETED: "completed",
@@ -57,7 +57,7 @@ const TASK_STATUS = Object.freeze({
 
 const USER_ROLES = Object.freeze({
     ADMIN: "admin",
-    USER: "user"
+    SUPER_ADMIN: "super-admin"
 });
 
 export {

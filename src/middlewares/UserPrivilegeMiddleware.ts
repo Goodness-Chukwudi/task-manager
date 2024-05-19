@@ -32,7 +32,7 @@ export class UserPrivilegeMiddleware extends BaseRouterMiddleware {
     public validateAdminPrivilege = async (req: Request, res: Response, next: any) => {
         try {
             const user = this.requestUtils.getRequestUser();
-            const query = {user: user._id, role: USER_ROLES.ADMIN, status: ITEM_STATUS.ACTIVE}
+            const query = {user: user._id, role: {$in: [USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN]}, status: ITEM_STATUS.ACTIVE}
             const userPrivilege = await privilegeRepository.findOne(query);
             
             if (userPrivilege) {

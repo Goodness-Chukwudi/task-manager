@@ -39,7 +39,7 @@ class AuthController extends BaseApiController {
                     phone: body.phone,
                     gender: body.gender
                 }
-                const user = await userRepository.save(userData);
+                const user = await userRepository.save(userData, session);
                 const passwordData = {
                     password: body.password,
                     email: user.email,
@@ -54,7 +54,7 @@ class AuthController extends BaseApiController {
                     user: user
                 }
 
-                return this.sendSuccessResponse(res, response, session);
+                return this.sendSuccessResponse(res, response, session, 201);
             } catch (error:any) {
                 this.sendErrorResponse(res, error, UNABLE_TO_COMPLETE_REQUEST, 500, session);
             }
@@ -63,6 +63,7 @@ class AuthController extends BaseApiController {
 
     login(path:string) {
         this.router.post(path,
+            this.appValidator.validateUserLogin,
             this.userMiddleWare.loadUserToRequestByEmail,
             this.userMiddleWare.validatePassword,
             this.userMiddleWare.logoutExistingSession

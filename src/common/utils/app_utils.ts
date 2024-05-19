@@ -1,8 +1,6 @@
 import RandomString, { GenerateOptions } from 'randomstring';
 import { v4 as uuidv4 } from 'uuid';
 import mongoose, { ClientSession } from 'mongoose';
-import Env from '../config/environment_variables';
-import { ENVIRONMENTS } from '../config/app_config';
 import { Request, Response } from 'express';
 
 const generateUUID = (): string => {
@@ -22,8 +20,6 @@ const generateUUID = (): string => {
 */
 const getCode = (length:number = 6, capitalize = false, readable = true): string => {
     try {
-        if (Env.ENVIRONMENT == ENVIRONMENTS.DEV) return "password";
-
         const options: GenerateOptions = {
             length: length,
             readable: readable,
@@ -107,7 +103,7 @@ const createMongooseTransaction = (): Promise<ClientSession> => {
  * @returns {void}
 */
 const recordResponseTime = (req:Request, res:Response, time:number) => {
-    console.log(`${req.method}: ${req.url} => ${time}ms`);
+    console.log(`${req.method}: ${req.url} => ${time.toFixed(3)} ms `, res.statusCode);
 }
 
 export {

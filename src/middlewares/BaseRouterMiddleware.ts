@@ -3,10 +3,11 @@ import BaseResponseHandler from "../controllers/base controllers/BaseResponseHan
 import { NextFunction, Request, Response, Router } from "express";
 import Joi from "joi";
 import { JoiValidatorOptions } from "../common/config/app_config";
-import { objectId } from "../common/utils/joi_extensions";
+import { date, objectId } from "../common/utils/joi_extensions";
 import { badRequestError } from "../common/constant/error_response_message";
 
 const JoiId = Joi.extend(objectId);
+const JoiDate = Joi.extend(date);
 
 /**
  * An abstract class that provides a base middleware for all routers.
@@ -39,16 +40,16 @@ abstract class BaseRouterMiddleware extends BaseResponseHandler {
     */ 
     validateDefaultQueries = async ( req: Request, res: Response, next: NextFunction ) => {
         try {
+            if(req.query.sort) req.query.sort = JSON.parse(req.query.sort.toString());
             const QuerySchema = Joi.object({
-
-                page_size: Joi.number().min(0),
+                limit: Joi.number().min(0),
                 page: Joi.number().min(0),
                 sort: Joi.object(),
                 user_id: JoiId.string().objectId(),
                 id: JoiId.string().objectId(),
                 ids: Joi.array().items(JoiId.string().objectId()).min(1),
-                startDate: Joi.date().iso(),
-                endDate: Joi.date().iso()
+                start_date: JoiDate.date().format("YYYY-MM-DD"),
+                end_date: JoiDate.date().format("YYYY-MM-DD")
             });
             const ParamSchema = Joi.object({
                 id: JoiId.string().objectId(),

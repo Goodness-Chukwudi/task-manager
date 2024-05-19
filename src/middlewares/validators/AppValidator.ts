@@ -16,6 +16,21 @@ class AppValidator extends BaseRouterMiddleware {
         super(appRouter);
     }
 
+    validateUserLogin = async ( req: Request, res: Response, next: NextFunction ) => {
+        try {
+            const BodySchema = Joi.object({
+                email: Joi.string().email().required(),
+                password: Joi.string().required()
+            });
+            
+            await BodySchema.validateAsync(req.body, JoiValidatorOptions);
+
+            next();
+        } catch (error: any) {
+            return this.sendErrorResponse(res, error, badRequestError(error.message), 400);
+        }
+    };
+
     validateUserSignup = async ( req: Request, res: Response, next: NextFunction ) => {
         try {
             const BodySchema = Joi.object({
