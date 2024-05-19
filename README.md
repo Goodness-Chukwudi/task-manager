@@ -2,7 +2,7 @@
 
 # Introduction
 
-This task management system provides users with features that creates, updates, assigns, approves and manage tasks. The applications has the user management, task management and auth modules. This API was built with Node.js and Express.js with MongoDB/Mongoose for database. Additionally, socket io was used to provide real time update when changes are made to a task (completion/approval and others).
+This task management system provides users with features to create, update, assign, approve and manage tasks. The applications has the user management, task management and auth modules. This system was built with Node.js/Express.js and MongoDB/Mongoose for database. Additionally, socket io was used to provide real time update when changes are made to a task (completion/approval and others).
 
 ## Prerequisites
 
@@ -18,11 +18,11 @@ Follow these steps to set up and run the Task Management System on your machine:
 
 1. **Install Dependencies**:
 
-   After cloning the project, navigate to the project folder using your terminal and enter the command npm install to install all the required dependencies. The package.json file specifies all the needed dependecies to run the application.
+   After cloning the project, navigate to the project folder using your terminal and enter the command "npm install" to install all the required dependencies. The package.json file specifies all the needed dependecies to run the application.
 
 2. **Run the Application**:
 
-   - Enter the command npm run dev to start the application. A list of possible command scripts are specified in the package.json file as well.
+   - Enter the command "npm run dev" to start the application. A list of possible command scripts are specified in the package.json file as well.
    - If running the app for the first time (no super admin has been created), the app creates a super admin with the seeded data and logs the login credentials on your console.
    - When logged in, emit a socket.io event with the name "request-connection" with the jwt token as payload. This allows the system to track your coonnection and update the client real time.
 
